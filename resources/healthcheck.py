@@ -1,4 +1,3 @@
-from .resource import Resource
+from . import Resource
 class HealthCheck(Resource):
-    KEY = 'EnsureHealthCheck'
     pass

@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 
-from resources import Resource
+import logging
+import resources
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 class InvalidRequestType: pass
 
@@ -20,14 +25,16 @@ def invoke_handler(event, context):
     raise NotImplementedError
 
 def cfn_handler(event, context):
+    logging.debug(f'CFN Handler: {event}')
     request_type  = event['RequestType']
     resource_type = event['ResourceType'].split('::')[-1]
 
-    for subclass in Resource.__subclasses__():
+    for subclass in resources.all_resources():
+        logger.debug(f'Checking if {resource_type} matches {subclass}\'s resource type')
         if subclass.resource_type() == resource_type:
 
             resource = subclass.init_from_event(event, context)
-            print(resource)
+            logger.debug(f'init resource {resource}')
 
             if request_type == 'Create':
                 resource.create()
@@ -52,20 +59,13 @@ def handler(event, context):
             send(event, context)
         raise
 
-class L:
-    @classmethod
-    def handler(cls, e, c):
-        print('Here')
-
 if __name__ == '__main__':
 
-    h = L.handler
-    h({'e':1}, {})
     cfn_handler({
-        'RequestType': 'Update',
+        'RequestType': 'Create',
         'ResourceType': 'Custom::HostedZone',
     }, {})
     cfn_handler({
-        'RequestType': 'Update',
+        'RequestType': 'Create',
         'ResourceType': 'Custom::HealthCheck',
     }, {})
