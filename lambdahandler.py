@@ -66,6 +66,9 @@ class LambdaHandler:
 
         raise InvalidResourceType(resource_type)
 
+    @classmethod
+    def handler(cls, event, context):
+        cls(event, context).process_event()
 
     def process_event(self):
 
@@ -82,11 +85,13 @@ class LambdaHandler:
 
 if __name__ == '__main__':
 
-    cfn_handler({
+    LambdaHandler.handler({
+        'StackId': 'arn',
         'RequestType': 'Create',
         'ResourceType': 'Custom::HostedZone',
     }, {})
-    cfn_handler({
+    LambdaHandler.handler({
+        'StackId': 'arn',
         'RequestType': 'Create',
         'ResourceType': 'Custom::HealthCheck',
     }, {})
