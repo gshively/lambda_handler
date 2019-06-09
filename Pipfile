@@ -9,6 +9,8 @@ colorlog = "*"
 
 [packages]
 boto3 = "*"
+requests = "*"
+cfn-response = "*"
 
 [requires]
 python_version = "3.7"

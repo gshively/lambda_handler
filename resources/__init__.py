@@ -7,6 +7,6 @@ logger = logging.getLogger(__name__)
 
 for ( module_loader, name, ispkg) in pkgutil.iter_modules([Path(__file__).parent]):
     """ Import all modules under the resources """
-    logger.debug(f'Importing resource "{name}" from "{module_loader.path}"')
+    logger.info(f'Importing resource "{name}" from "{module_loader.path}"')
     importlib.import_module('.' + name, __package__)
 

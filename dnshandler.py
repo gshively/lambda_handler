@@ -7,14 +7,18 @@ from lambdahandler import LambdaHandler
 class DnsHandler(LambdaHandler):
     pass
 
+def handler(event, context):
+    DnsHandler(event, context).processevent()
+
+
 if __name__ == '__main__':
 
-    DnsHandler.handler({
+    handler({
         'StackId': 'arn',
         'RequestType': 'Create',
         'ResourceType': 'Custom::HostedZone',
     }, {})
-    DnsHandler.handler({
+    handler({
         'StackId': 'arn',
         'RequestType': 'Create',
         'ResourceType': 'Custom::HealthCheck',

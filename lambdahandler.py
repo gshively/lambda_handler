@@ -2,24 +2,15 @@
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
+from enum import Enum
+
+import cfnresponse
 
 from customresource import CustomResource
 import resources
 
 class InvalidRequestType(Exception): pass
 class InvalidResourceType(Exception): pass
-
-def cfn_send(event, context, status, physical_id, resource_data):
-    pass
-
-def send_fail(event, context, resource):
-    cfn_send(event, context, 'fail', None, None)
-
-def send_success(event, context, resource):
-    resource_id = resource.physical_id
-    response_data = resource.response_data
-
-    cfn_send(event, context, 'success', resource_id, response_data)
 
 class LambdaHandler:
 
@@ -28,6 +19,26 @@ class LambdaHandler:
         self.context = context
 
         self.logger = logging.getLogger(self.__class__.__name__)
+
+    def send_response(self, status, reason=None, resource=None):
+        """Send response back to CFN Url"""
+
+        self.logger.debug( 'cfnresponse.send("%s", %s, "%s", "%s")',
+            status,
+            f'"{reason}"' if reason else 'None',
+            f'"{resource.data}"' if resource and resource.data else 'None',
+            f'"{resource.physical_id}"' if resource and resource.physical_id else 'None'
+        )
+        """
+        cfnresponse.send(
+            self.event,
+            self.context,
+            status,
+            reason,
+            resource or resource.data,
+            resource or resource.resource_id
+        )
+        """
 
     @property
     def stack_id(self):
@@ -50,7 +61,7 @@ class LambdaHandler:
             if subclass.resource_type() == resource_type:
 
                 resource = subclass.init_from_event(self.event, self.context)
-                self.logger.debug(f'init resource {resource}')
+                self.logger.debug(f'Initializing resource {resource}')
 
                 if request_type == 'Create':
                     resource.create()
@@ -61,7 +72,7 @@ class LambdaHandler:
                 else:
                     raise InvalidRequestType(request_type)
 
-                send_success(self.event, self.context, resource)
+                self.send_response('SUCCESS', resource=resource)
                 return
 
         raise InvalidResourceType(resource_type)
@@ -80,7 +91,7 @@ class LambdaHandler:
 
         except Exception as e:
             if self.response_url:
-                self.send(event, context)
+                self.send('FAILURE', reason=str(e))
             raise
 
 if __name__ == '__main__':

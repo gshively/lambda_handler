@@ -29,7 +29,7 @@ class CustomResource:
         return self._event.get('PhysicalResourceId')
 
     @property
-    def response_data(self):
+    def data(self):
         return {}
 
     @classmethod
