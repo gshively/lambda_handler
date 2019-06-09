@@ -1,3 +1,3 @@
-from . import Resource
-class HealthCheck(Resource):
+from customresource import CustomResource
+class HealthCheck(CustomResource):
     pass

@@ -1,3 +1,3 @@
-from . import Resource
-class HostedZone(Resource):
+from customresource import CustomResource
+class HostedZone(CustomResource):
     pass
