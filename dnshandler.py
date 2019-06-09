@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-import logging.config
-logging.config.fileConfig('logging.conf')
+import logging_config
 
 from lambdahandler import LambdaHandler
 
