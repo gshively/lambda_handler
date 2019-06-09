@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 
 import logging
+logging.basicConfig(level=logging.DEBUG)
+
 from customresource import CustomResource
 import resources
-
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 class InvalidRequestType(Exception): pass
 class InvalidResourceType(Exception): pass
@@ -26,31 +24,33 @@ def send_success(event, context, resource):
 class LambdaHandler:
 
     def __init__(self, event, context):
-        self._event = event
-        self._context = context
+        self.event = event
+        self.context = context
+
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     @property
     def stack_id(self):
-        return self._event.get('StackId')
+        return self.event.get('StackId')
 
     @property
     def response_url(self):
-        return self._event.get('ResponseURL')
+        return self.event.get('ResponseURL')
 
     def invoke_handler(self):
         raise NotImplementedError
 
     def cfn_handler(self):
-        logging.debug(f'CFN Handler: {self._event}')
-        request_type  = self._event['RequestType']
-        resource_type = self._event['ResourceType'].split('::')[-1]
+        self.logger.debug(f'CFN Handler: {self.event}')
+        request_type  = self.event['RequestType']
+        resource_type = self.event['ResourceType'].split('::')[-1]
 
         for subclass in CustomResource.all_resources():
-            logger.debug(f'Checking if {resource_type} matches {subclass}\'s resource type')
+            self.logger.debug(f'Checking if {resource_type} matches {subclass}\'s resource type')
             if subclass.resource_type() == resource_type:
 
-                resource = subclass.init_from_event(self._event, self._context)
-                logger.debug(f'init resource {resource}')
+                resource = subclass.init_from_event(self.event, self.context)
+                self.logger.debug(f'init resource {resource}')
 
                 if request_type == 'Create':
                     resource.create()
@@ -61,16 +61,16 @@ class LambdaHandler:
                 else:
                     raise InvalidRequestType(request_type)
 
-                send_success(self._event, self._context, resource)
+                send_success(self.event, self.context, resource)
                 return
 
         raise InvalidResourceType(resource_type)
 
     @classmethod
     def handler(cls, event, context):
-        cls(event, context).process_event()
+        cls(event, context).processevent()
 
-    def process_event(self):
+    def processevent(self):
 
         try:
             if self.stack_id:

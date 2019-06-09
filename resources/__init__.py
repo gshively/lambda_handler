@@ -4,7 +4,7 @@ from pathlib import Path
 
 import logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+print(__name__)
 
 
 for ( module_loader, name, ispkg) in pkgutil.iter_modules([Path(__file__).parent]):

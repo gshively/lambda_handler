@@ -1,7 +1,6 @@
 import logging
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 class CustomResource:
 
     @classmethod
@@ -17,13 +16,13 @@ class CustomResource:
         return cls.__name__
 
     def create(self):
-        logger.debug(f'{self.__class__.__name__} create')
+        logger.info(f'{self.__class__.__name__} create')
 
     def update(self):
-        logger.debug(f'{self.__class__.__name__} update')
+        logger.info(f'{self.__class__.__name__} update')
 
     def delete(self):
-        logger.debug(f'{self.__class__.__name__} delete')
+        logger.info(f'{self.__class__.__name__} delete')
 
     @property
     def physical_id(self):
