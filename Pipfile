@@ -6,6 +6,8 @@ verify_ssl = true
 [dev-packages]
 awscli-local = "*"
 colorlog = "*"
+pytest = "*"
+hypothesis = "*"
 
 [packages]
 boto3 = "*"

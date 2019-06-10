@@ -2,7 +2,7 @@
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
-from enum import Enum
+logger = logging.getLogger(__name__)
 
 import cfnresponse
 
@@ -18,12 +18,10 @@ class LambdaHandler:
         self.event = event
         self.context = context
 
-        self.logger = logging.getLogger(self.__class__.__name__)
-
     def send_response(self, status, reason=None, resource=None):
         """Send response back to CFN Url"""
 
-        self.logger.debug( 'cfnresponse.send("%s", %s, "%s", "%s")',
+        logger.debug( 'cfnresponse.send("%s", %s, "%s", "%s")',
             status,
             f'"{reason}"' if reason else 'None',
             f'"{resource.data}"' if resource and resource.data else 'None',
@@ -49,19 +47,20 @@ class LambdaHandler:
         return self.event.get('ResponseURL')
 
     def invoke_handler(self):
+        logger.debug(f'Processing using the Invoke Handler: {self.event}')
         raise NotImplementedError
 
     def cfn_handler(self):
-        self.logger.debug(f'CFN Handler: {self.event}')
+        logger.debug(f'Processing using the CloudFormation Handler: {self.event}')
         request_type  = self.event['RequestType']
         resource_type = self.event['ResourceType'].split('::')[-1]
 
         for subclass in CustomResource.all_resources():
-            self.logger.debug(f'Checking if {resource_type} matches {subclass}\'s resource type')
+            logger.debug(f'Checking if {resource_type} matches {subclass}\'s resource type')
             if subclass.resource_type() == resource_type:
 
                 resource = subclass.init_from_event(self.event, self.context)
-                self.logger.debug(f'Initializing resource {resource}')
+                logger.debug(f'Initializing resource {resource}')
 
                 if request_type == 'Create':
                     resource.create()
@@ -77,11 +76,7 @@ class LambdaHandler:
 
         raise InvalidResourceType(resource_type)
 
-    @classmethod
-    def handler(cls, event, context):
-        cls(event, context).processevent()
-
-    def processevent(self):
+    def process_event(self):
 
         try:
             if self.stack_id:
@@ -96,13 +91,13 @@ class LambdaHandler:
 
 if __name__ == '__main__':
 
-    LambdaHandler.handler({
+    LambdaHandler({
         'StackId': 'arn',
         'RequestType': 'Create',
         'ResourceType': 'Custom::HostedZone',
-    }, {})
-    LambdaHandler.handler({
+    }, {}).process_event()
+    LambdaHandler({
         'StackId': 'arn',
         'RequestType': 'Create',
         'ResourceType': 'Custom::HealthCheck',
-    }, {})
+    }, {}).process_event()
